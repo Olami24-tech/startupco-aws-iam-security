@@ -11,6 +11,7 @@ The solution uses two Infrastructure as Code (IaC) technologies:
 
 The project focuses on role-based access control (RBAC), least-privilege permissions, multi-factor authentication (MFA) enforcement, and infrastructure validation.
 
+
 ## Architecture
 
 The IAM architecture supports four departments:
@@ -23,6 +24,11 @@ The IAM architecture supports four departments:
 | Analysts | Read-only S3 object access in a designated bucket and RDS metadata access |
 
 Each department has its own IAM group, representative IAM user, and permissions policy.
+### AWS IAM Architecture Diagram
+
+The following diagram illustrates the IAM group structure, department-specific permissions, and security controls implemented using Terraform and CloudFormation.
+
+[View the AWS IAM Architecture Diagram](diagrams/architecture.md)
 
 ## Security Controls
 
