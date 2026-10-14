@@ -1,0 +1,42 @@
+
+# Terraform provider downloads
+**/.terraform/
+
+# Terraform state and backups
+*.tfstate
+*.tfstate.*
+*.tfbackup
+
+# Terraform plans and variable files
+*.tfplan
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# AWS credentials and configuration
+.aws/
+credentials
+
+# SSH keys and private keys
+.ssh/
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db

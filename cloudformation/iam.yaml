@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'StartupCo IAM CloudFormation Template'
+Parameters:
+  ApplicationBucketName:
+    Type: String
+    Description: The name of the application bucket
+
+Resources:
+  DeveloperGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: DeveloperGroup
+
+  FinanceGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: FinanceGroup
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
+
+  OperationGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: OperationGroup
+
+  AnalystGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: AnalystGroup
+
+  DeveloperUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Olami_dev
+      Groups:
+        - !Ref DeveloperGroup
+
+
+  FinanceUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Olami_finance
+      Groups:
+        - !Ref FinanceGroup
+
+
+  OperationUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Olami_operation
+      Groups:
+        - !Ref OperationGroup
+
+
+  AnalystUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: Olami_analyst
+      Groups:
+        - !Ref AnalystGroup
+
+
+
+  DeveloperPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: StartupCoDeveloperPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EC2Management
+            Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+              - ec2:StartInstances
+              - ec2:StopInstances
+              - ec2:RebootInstances
+            Resource: "*"
+          - Sid: S3ListApplicationBucket
+            Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+            - !Sub "arn:aws:s3:::${ApplicationBucketName}"
+            - Sid: S3ApplicationFileManagement
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource:
+              - !Sub "arn:aws:s3:::${ApplicationBucketName}/*"
+          - Sid: CloudWatchManagement
+            Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:GetLogEvents
+              - logs:FilterLogEvents
+            Resource: "*"
+      Groups:
+        - !Ref DeveloperGroup
+
+  OperationPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: StartupCoOperationPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EC2Management
+            Effect: Allow
+            Action:
+              - "ec2:*"
+            Resource: "*"
+          - Sid: CloudWatchManagement
+            Effect: Allow
+            Action:
+              - "logs:*"
+            Resource: "*"
+          - Sid: SystemManagerManagement
+            Effect: Allow
+            Action:
+              - ssm:DescribeInstanceInformation
+              - ssm:GetCommandInvocation
+              - ssm:ListCommandInvocations
+              - ssm:ListCommands
+              - ssm:SendCommand
+            Resource: "*"
+          - Sid: RDSManagement
+            Effect: Allow
+            Action:
+              - rds:RebootDBInstance
+              - rds:ModifyDBInstance
+              - rds:CreateDBInstance
+              - rds:DeleteDBSnapshot
+              - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
+              - rds:DescribeDBSnapshots
+              - rds:StartDBInstance
+              - rds:StopDBInstance
+            Resource: "*"
+      Groups:
+        - !Ref OperationGroup
+
+  FinancePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: StartupCoFinancePolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: FinancialManagement
+            Effect: Allow
+            Action:
+              - "budgets:*"
+              - "ce:*"
+            Resource: "*"
+      Groups:
+        - !Ref FinanceGroup
+
+  AnalystPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: StartupCoAnalystPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: S3ListApplicationBucket
+            Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${ApplicationBucketName}"
+          - Sid: S3ApplicationFileRead
+            Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Sub "arn:aws:s3:::${ApplicationBucketName}/*"
+          - Sid: RDSReadOnlyAccess
+            Effect: Allow
+            Action:
+              - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
+              - rds:DescribeDBSnapshots
+              - rds:DescribeDBClusterSnapshots
+            Resource:
+              - !Sub "arn:aws:rds:::${AWS::AccountId}:db:*"
+      Groups:
+        - !Ref AnalystGroup
+
+  MFAEnforcementPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: StartupCoMFAEnforcementPolicy
+      Groups:
+        - !Ref DeveloperGroup
+        - !Ref FinanceGroup
+        - !Ref OperationGroup
+        - !Ref AnalystGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyAccessWithoutMFA
+            Effect: Deny
+            NotAction:
+              - iam:GetUser
+              - iam:ListMFADevices
+              - iam:CreateVirtualMFADevice
+              - iam:EnableMFADevice
+              - iam:ResyncMFADevice
+            Resource: "*"
+            Condition:
+              BoolIfExists:
+                aws:MultiFactorAuthPresent: "false"
