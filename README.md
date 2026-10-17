@@ -72,6 +72,11 @@ Terraform manages 25 IAM resources in the implementation.
 
 ## Validation and Security Testing
 
+### Security Testing Report
+
+A detailed record of the IAM Policy Simulator tests, expected and actual results, MFA enforcement verification, and testing limitations is available here:
+
+[View IAM Security Testing Report](docs/security-testing.md)
 The project was validated using Terraform CLI commands and the AWS IAM Policy Simulator.
 
 ### Terraform Validation
